@@ -1,0 +1,38 @@
+name: Build Windows EXE
+
+on:
+  workflow_dispatch:          # 允许手动触发
+  push:
+    branches: [ main ]        # 推送到 main 分支时自动触发（可选）
+
+jobs:
+  build:
+    runs-on: windows-latest   # 使用最新 Windows 运行器
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'   # 可根据需要调整
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        run: |
+          pyinstaller --noconfirm --clean --windowed --name LogisticsMergeTool `
+            --hidden-import openpyxl `
+            --hidden-import PySide6 `
+            main.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LogisticsMergeTool-Windows
+          path: dist/LogisticsMergeTool/
